@@ -22,6 +22,10 @@ public class SearchKeeper extends Thread {
         _search_ids.remove(id);
     }
 
+    public synchronized boolean has(String id) {
+        return _search_ids.contains(id);
+    }
+
     @Override
     public void run() {
         while(true) {

@@ -7,6 +7,7 @@ public class Node extends Thread {
     public final NodeInfo _info;
     public Connector _connector;
     public String _datafile = "metafile";
+    private SearchKeeper _search_keeper;
     /*
     _search_agents stores UUID(strings) : SearchAgent object
     for that search
@@ -18,6 +19,7 @@ public class Node extends Thread {
         _connector = new Connector(this);
         _connector.start();
         _search_agents = new ConcurrentHashMap<>();
+        _search_keeper = new SearchKeeper(this);
     }
 
     public synchronized void take_commands() {
@@ -35,7 +37,22 @@ public class Node extends Thread {
             @SuppressWarnings("unchecked")
             HashMap<String,String> content = msg.getContent();
             System.out.println(content);
+
+            if(_search_keeper.has(content.get("id"))) {
+                /*
+                then I've already searched for this message
+                in 'recent' past, won't do a local search
+                 */
+            }
+            else {
+                local_search(content.get("search_string"));
+                _search_keeper.add(content.get("id"));
+            }
         }
+    }
+
+    public void local_search(String query) {
+
     }
 
     public synchronized void execute_command(String command) {

@@ -55,8 +55,8 @@ public class SearchAgent extends Thread {
         Else continue search with hop_count*2
          */
         while(_running && _hop_count < 16) {
-            _hop_count = _hop_count*2;
             search();
+            _hop_count = _hop_count*2;
             try {
                 Thread.sleep(_t_out*_hop_count);
             } catch (InterruptedException ex) {

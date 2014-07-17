@@ -24,12 +24,12 @@ public class Message implements Serializable {
     public static class MessageBuilder {
         private NodeInfo to,from;
         private String type;
-        private HashMap<String,String> content = new HashMap();
+        private HashMap<String,String> content = new HashMap<>();
         public MessageBuilder() {}
         public MessageBuilder from(NodeInfo from) {this.from = from; return this;}
         public MessageBuilder to(NodeInfo to) {this.to = to; return this;}
         public MessageBuilder type(String type) {this.type = type; return this;}
-        public MessageBuilder content(HashMap content) {this.content = content; return this;}
+        public MessageBuilder content(HashMap<String,String> content) {this.content = content; return this;}
         public Message build() {return new Message(this);}
     }
 

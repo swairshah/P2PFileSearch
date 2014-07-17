@@ -7,7 +7,7 @@ public class Connector extends Thread {
     public Node _node_ref;
     public int _total_neighbours = 0;
     // _neighbour has k:v pairs as node_id : NodeInfo
-    public ConcurrentHashMap<Integer,NodeInfo> _neighbours;
+    //public ConcurrentHashMap<Integer,NodeInfo> _neighbours;
 
     // _node_lookup has k:v pairs as "ip:port" : node_id
     public ConcurrentHashMap<String,Integer> _node_lookup;
@@ -18,7 +18,7 @@ public class Connector extends Thread {
 
     public Connector(Node n) {
         _node_ref = n;
-        _neighbours = new ConcurrentHashMap<>();
+        //_neighbours = new ConcurrentHashMap<>();
         _node_lookup = new ConcurrentHashMap<>();
         _cli_socks = new ConcurrentHashMap<>();
         _outstreams = new ConcurrentHashMap<>();

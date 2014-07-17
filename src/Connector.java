@@ -26,20 +26,10 @@ public class Connector extends Thread {
 
     public void send_message(Message msg, NodeInfo n) {
         if (!_node_lookup.containsKey(n.toString())) {
-            System.err.println("node "+n+" not in _neighbours");
+            System.err.println("node "+n+" not in _node_lookup");
             return;
         }
         try {
-            Socket sock = new Socket(n.ip, n.port);
-            OutputStream outstream = sock.getOutputStream();
-
-            int id = _total_neighbours+1;
-            _total_neighbours++;
-
-            _node_lookup.put(n.toString(),id);
-            _cli_socks.put(id,sock);
-            _outstreams.put(id,outstream);
-
             ObjectOutputStream stream = new ObjectOutputStream(_outstreams.get(_node_lookup.get(n.toString())));
             stream.writeObject(msg);
             stream.flush();

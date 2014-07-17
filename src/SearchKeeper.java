@@ -39,7 +39,7 @@ public class SearchKeeper extends Thread {
                     _search_ids.remove(id);
                 }
                 else {
-                    int new_ttl = _search_ids.get(id) - 1;
+                    int new_ttl = _search_ids.get(id) - 1000;
                     _search_ids.put(id,new_ttl);
                 }
             }

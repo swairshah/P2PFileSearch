@@ -49,7 +49,6 @@ public class Connector extends Thread {
     }
 
     public synchronized void neighbour_joined(NodeInfo n) {
-        System.out.println(n);
         try {
             Socket sock = new Socket(n.ip, n.port);
             OutputStream outstream = sock.getOutputStream();

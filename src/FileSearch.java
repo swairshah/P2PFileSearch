@@ -11,7 +11,7 @@ public class FileSearch {
         _search_term = search_term.toLowerCase();
     }
 
-    public boolean search_line(String line) {
+    public synchronized boolean search_line(String line) {
         if(line.contains(_search_term)) {
             return true;
         }
@@ -20,7 +20,7 @@ public class FileSearch {
         }
     }
 
-    public ArrayList search() {
+    public synchronized ArrayList search() {
         ArrayList<String> results = new ArrayList<>();
         try(BufferedReader reader = new BufferedReader(new FileReader(_filename))) {
             String line;

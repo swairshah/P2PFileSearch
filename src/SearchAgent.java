@@ -29,7 +29,7 @@ public class SearchAgent extends Thread {
         */
         for (String n_str : _node_ref._connector._node_lookup.keySet()) {
             NodeInfo n = new NodeInfo(n_str);
-            HashMap<String,String> content = new HashMap<String,String>();
+            HashMap<String,String> content = new HashMap<>();
 
             content.put("search_id",_search_id.toString());
             content.put("search_term",_search_term);

@@ -4,15 +4,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class FileSearch {
-    private String _search_term;
     private String _filename;
-    public FileSearch(String filename, String search_term) {
+    public FileSearch(String filename) {
         _filename = filename;
-        _search_term = search_term.toLowerCase();
     }
 
-    public synchronized boolean search_line(String line) {
-        if(line.contains(_search_term)) {
+    public synchronized boolean search_line(String line, String query) {
+        if(line.contains(query)) {
             return true;
         }
         else {
@@ -20,13 +18,13 @@ public class FileSearch {
         }
     }
 
-    public synchronized ArrayList search() {
+    public synchronized ArrayList search(String query) {
         ArrayList<String> results = new ArrayList<>();
         try(BufferedReader reader = new BufferedReader(new FileReader(_filename))) {
             String line;
             String matched_file;
             while((line = reader.readLine()) != null) {
-                if(search_line(line)) {
+                if(search_line(line, query)) {
                     matched_file = line.split(" ")[0];
                     results.add(matched_file);
                 }
@@ -39,7 +37,7 @@ public class FileSearch {
     }
 
     public static void main(String args[]) {
-        FileSearch f = new FileSearch(args[0],args[1]);
-        System.out.println(f.search());
+        FileSearch f = new FileSearch(args[0]);
+        System.out.println(f.search(args[1]));
     }
 }

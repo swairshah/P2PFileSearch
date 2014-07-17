@@ -1,13 +1,23 @@
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Node extends Thread {
     public final NodeInfo _info;
-    private Connector _connector;
+    public Connector _connector;
+    public String _datafile = "metafile";
+    /*
+    _search_agents stores UUID(strings) : SearchAgent object
+    for that search
+     */
+    public ConcurrentHashMap<String, SearchAgent> _search_agents;
 
     public Node(NodeInfo info) {
         _info = info;
         _connector = new Connector(this);
         _connector.start();
+        _search_agents = new ConcurrentHashMap<>();
     }
 
     public synchronized void take_commands() {
@@ -16,6 +26,15 @@ public class Node extends Thread {
             System.out.print("> ");
             String command = scanner.nextLine();
             this.execute_command(command);
+        }
+    }
+
+    public void process_msg(Message msg) {
+        System.out.println("got msg "+ msg.getType());
+        if (msg.getType().equals("search")) {
+            @SuppressWarnings("unchecked")
+            HashMap<String,String> content = msg.getContent();
+            System.out.println(content);
         }
     }
 
@@ -54,7 +73,9 @@ public class Node extends Thread {
         else if (cmd.startsWith("search")) {
             String[] parts = cmd.split(" ");
             String search_term = parts[1];
-
+            SearchAgent search_agent = new SearchAgent(search_term,this);
+            _search_agents.put(search_agent._search_id.toString(), search_agent);
+            search_agent.start();
         }
         else if (cmd.startsWith("leave")) {
 

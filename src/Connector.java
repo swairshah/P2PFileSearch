@@ -61,7 +61,7 @@ public class Connector extends Thread {
             System.out.println("join from "+msg.getSender());
             neighbour_joined(msg.getSender());
         }
-        else if (msg.getType().equals("search")) {
+        else if (msg.getType().startsWith("search")) {
             _node_ref.process_msg(msg);
         }
     }

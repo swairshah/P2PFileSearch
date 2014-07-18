@@ -2,7 +2,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SearchKeeper extends Thread {
     private Node _node_ref;
-    public final int _default_ttl = 8000; // Milliseconds
+    public final int _default_ttl = 18000; // Milliseconds
     /*
     _search_ids contains k:v pairs like:
     id : TTL

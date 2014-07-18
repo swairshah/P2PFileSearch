@@ -125,6 +125,26 @@ public class Node extends Thread {
             if (_search_agents.containsKey(search_id)) {
                 SearchAgent sa = _search_agents.get(search_id);
                 sa.terminate();
+                //TODO: display results properly
+            }
+            /*
+            this search could be a relay-search
+            check _search_keeper for its id
+            if its there, forward to the peer,
+             */
+            else if (_search_keeper.has(search_id)) {
+                if (_search_keeper.has_peer_for(search_id)) {
+                    _connector.send_message(msg, _search_keeper.get_peer(search_id));
+                }
+                else {
+                    System.err.println("id exists but no peer for "+ search_id + " " + content.get("search_term") );
+                }
+            }
+            /*
+            else we may have timed out on it, so drop it
+             */
+            else {
+               // do nothing
             }
         } //end *search_result* handling
     }

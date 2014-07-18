@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -8,6 +9,7 @@ public class Node extends Thread {
     public Connector _connector;
     public String _datafile = "metafile";
     private SearchKeeper _search_keeper;
+    private FileSearch _file_search;
     /*
     _search_agents stores UUID(strings) : SearchAgent object
     for that search
@@ -20,6 +22,9 @@ public class Node extends Thread {
         _connector.start();
         _search_agents = new ConcurrentHashMap<>();
         _search_keeper = new SearchKeeper(this);
+        _search_keeper.start();
+
+        _file_search = new FileSearch(_datafile);
     }
 
     public synchronized void take_commands() {
@@ -33,26 +38,88 @@ public class Node extends Thread {
 
     public void process_msg(Message msg) {
         System.out.println("got msg "+ msg.getType());
+
         if (msg.getType().equals("search")) {
             @SuppressWarnings("unchecked")
-            HashMap<String,String> content = msg.getContent();
+            HashMap<String, String> content = msg.getContent();
             System.out.println(content);
-
-            if(_search_keeper.has(content.get("id"))) {
+            if (_search_keeper.has(content.get("search_id"))) {
                 /*
                 then I've already searched for this message
                 in 'recent' past, won't do a local search
                  */
             }
             else {
-                local_search(content.get("search_string"));
-                _search_keeper.add(content.get("id"));
+                System.out.println(_search_keeper._search_ids);
+                String result = local_search(content.get("search_term"));
+                _search_keeper.add(content.get("search_id"));
+
+                /*
+                now build a search_result
+                message and send to msg.getSender()
+                 */
+
+                HashMap<String, String> res_content = new HashMap<>();
+
+                res_content.put("search_id", content.get("search_id"));
+                res_content.put("search_term", content.get("search_term"));
+                res_content.put("initiator", content.get("initiator"));
+                res_content.put("search_result", result);
+
+                Message result_msg = new Message.MessageBuilder()
+                        .type("search_result")
+                        .content(res_content)
+                        .to(msg.getSender())
+                        .from(_info).build();
+
+                System.out.println("sending search_results "+ result);
+                _connector.send_message(result_msg, msg.getSender());
             }
-        }
+
+             /*
+             forward msg to neighbours is hop_count != 0
+             */
+            if (Integer.parseInt(content.get("hop_count")) == 0) {
+                /* Don't forward the message */
+            }
+            else {
+                // Decrease the hop_count of the new message
+                int fwd_hop_count = Integer.parseInt(content.get("hop_count")) - 1;
+                HashMap<String, String> fwd_content = new HashMap<>();
+
+                fwd_content.put("search_id", content.get("search_id"));
+                fwd_content.put("search_term", content.get("search_term"));
+                fwd_content.put("initiator", content.get("initiator"));
+                fwd_content.put("hop_count", Integer.toString(fwd_hop_count));
+
+                Message result_msg = new Message.MessageBuilder()
+                        .type("search")
+                        .content(fwd_content)
+                        .from(_info).build();
+
+                _connector.send_neighbours_except(msg, msg.getSender());
+            }
+
+        } // end *search* handling
+
+        /*
+         *search_result*
+        */
+        else if(msg.getType().equals("search_result")) {
+            @SuppressWarnings("unchecked")
+            HashMap<String, String> content = msg.getContent();
+            System.out.println("result received: " + content.get("search_result") + " from " + msg.getSender());
+        } //end *search_result* handling
     }
 
-    public void local_search(String query) {
-
+    public String local_search(String query) {
+        @SuppressWarnings("unchecked")
+        ArrayList<String> results =_file_search.search(query);
+        String result_str = "";
+        for (String s : results) {
+            result_str += s + ",";
+        }
+        return result_str;
     }
 
     public synchronized void execute_command(String command) {

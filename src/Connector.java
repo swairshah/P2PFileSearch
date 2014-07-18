@@ -24,6 +24,24 @@ public class Connector extends Thread {
         _outstreams = new ConcurrentHashMap<>();
     }
 
+    public void send_nieghbours(Message msg) {
+        for (String n_str : _node_lookup.keySet()) {
+            NodeInfo n = new NodeInfo(n_str);
+            send_message(msg,n);
+        }
+    }
+
+    public void send_neighbours_except(Message msg, NodeInfo m) {
+        for (String n_str : _node_lookup.keySet()) {
+            if (m.toString().equals(n_str)) {
+                continue;
+            }
+
+            NodeInfo n = new NodeInfo(n_str);
+            send_message(msg,n);
+        }
+    }
+
     public void send_message(Message msg, NodeInfo n) {
         if (!_node_lookup.containsKey(n.toString())) {
             System.err.println("node "+n+" not in _node_lookup");

@@ -52,7 +52,12 @@ public class Node extends Thread {
             else {
                 System.out.println(_search_keeper._search_ids);
                 String result = local_search(content.get("search_term"));
-                _search_keeper.add(content.get("search_id"));
+
+                if (result.equals("")) {
+                    // Don't send a reply
+                }
+                else {
+                 _search_keeper.add(content.get("search_id"));
 
                 /*
                 now build a search_result
@@ -74,6 +79,7 @@ public class Node extends Thread {
 
                 System.out.println("sending search_results "+ result);
                 _connector.send_message(result_msg, msg.getSender());
+                }
             }
 
              /*
@@ -103,23 +109,40 @@ public class Node extends Thread {
         } // end *search* handling
 
         /*
-         *search_result*
+         *search_result* handling
         */
         else if(msg.getType().equals("search_result")) {
             @SuppressWarnings("unchecked")
             HashMap<String, String> content = msg.getContent();
             System.out.println("result received: " + content.get("search_result") + " from " + msg.getSender());
+
+            /*
+            If the search is initiated by us,
+            we'll have an associated search agent in _search_agents,
+            since we got a result, stop the agent.
+             */
+            String search_id = content.get("search_id");
+            if (_search_agents.containsKey(search_id)) {
+                SearchAgent sa = _search_agents.get(search_id);
+                sa.terminate();
+            }
         } //end *search_result* handling
     }
 
     public String local_search(String query) {
         @SuppressWarnings("unchecked")
         ArrayList<String> results =_file_search.search(query);
-        String result_str = "";
-        for (String s : results) {
-            result_str += s + ",";
+        if (results.isEmpty()) {
+            return "";
         }
-        return result_str;
+        else {
+            String result_str = "";
+            for (String s : results) {
+                result_str += s + ",";
+            }
+            return result_str;
+        }
+
     }
 
     public synchronized void execute_command(String command) {

@@ -24,7 +24,7 @@ public class Connector extends Thread {
         _outstreams = new ConcurrentHashMap<>();
     }
 
-    public void send_nieghbours(Message msg) {
+    public void send_neighbours(Message msg) {
         for (String n_str : _node_lookup.keySet()) {
             NodeInfo n = new NodeInfo(n_str);
             send_message(msg,n);

@@ -57,7 +57,7 @@ public class Node extends Thread {
                     // Don't send a reply
                 }
                 else {
-                 _search_keeper.add(content.get("search_id"));
+                 _search_keeper.add(content.get("search_id"),msg.getSender());
 
                 /*
                 now build a search_result

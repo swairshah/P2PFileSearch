@@ -23,7 +23,7 @@ public class SearchKeeper extends Thread {
     }
 
     public synchronized boolean has(String id) {
-        return _search_ids.contains(id);
+        return _search_ids.containsKey(id);
     }
 
     @Override

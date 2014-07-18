@@ -50,15 +50,14 @@ public class Node extends Thread {
                  */
             }
             else {
-                System.out.println(_search_keeper._search_ids);
+                _search_keeper.add(content.get("search_id"),msg.getSender());
+
                 String result = local_search(content.get("search_term"));
 
                 if (result.equals("")) {
                     // Don't send a reply
                 }
                 else {
-                 _search_keeper.add(content.get("search_id"),msg.getSender());
-
                 /*
                 now build a search_result
                 message and send to msg.getSender()

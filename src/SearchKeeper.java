@@ -7,23 +7,40 @@ public class SearchKeeper extends Thread {
     _search_ids contains k:v pairs like:
     id : TTL
     when TTL hits 0 remove it.
+
+    _search_peers contains k:v pairs like:
+    id : NodeInfo of immediate sender of the request
      */
     public ConcurrentHashMap<String,Integer> _search_ids;
+    public ConcurrentHashMap<String,NodeInfo> _search_peers;
     public SearchKeeper(Node node) {
         _node_ref = node;
         _search_ids = new ConcurrentHashMap<>();
+        _search_peers = new ConcurrentHashMap<>();
     }
 
     public synchronized void add(String id) {
         _search_ids.put(id,_default_ttl);
     }
 
+    public synchronized void add(String id, NodeInfo peer) {
+        _search_ids.put(id,_default_ttl);
+        _search_peers.put(id,peer);
+    }
+
     public synchronized void remove(String id) {
         _search_ids.remove(id);
+        if (_search_peers.containsKey(id)) {
+            _search_peers.remove(id);
+        }
     }
 
     public synchronized boolean has(String id) {
         return _search_ids.containsKey(id);
+    }
+
+    public synchronized boolean has_peer_for(String id) {
+        return _search_peers.containsKey(id);
     }
 
     @Override
@@ -36,7 +53,7 @@ public class SearchKeeper extends Thread {
             }
             for(String id : _search_ids.keySet()) {
                 if (_search_ids.get(id) == 0) {
-                    _search_ids.remove(id);
+                    this.remove(id);
                 }
                 else {
                     int new_ttl = _search_ids.get(id) - 1000;

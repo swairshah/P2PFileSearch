@@ -98,12 +98,12 @@ public class Node extends Thread {
                 fwd_content.put("initiator", content.get("initiator"));
                 fwd_content.put("hop_count", Integer.toString(fwd_hop_count));
 
-                Message result_msg = new Message.MessageBuilder()
+                Message fwd_msg = new Message.MessageBuilder()
                         .type("search")
                         .content(fwd_content)
                         .from(_info).build();
 
-                _connector.send_neighbours_except(msg, msg.getSender());
+                _connector.send_neighbours_except(fwd_msg, msg.getSender());
             }
 
         } // end *search* handling

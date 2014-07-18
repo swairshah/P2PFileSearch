@@ -43,6 +43,10 @@ public class SearchKeeper extends Thread {
         return _search_peers.containsKey(id);
     }
 
+    public synchronized NodeInfo get_peer(String id) {
+        return _search_peers.get(id);
+    }
+
     @Override
     public void run() {
         while(true) {

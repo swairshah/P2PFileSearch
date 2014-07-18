@@ -54,7 +54,7 @@ public class SearchAgent extends Thread {
         If result comes. Exit.
         Else continue search with hop_count*2
          */
-        while(_running && _hop_count < 16) {
+        while(_running && _hop_count <= 16) {
             search();
             _hop_count = _hop_count*2;
             try {

@@ -113,7 +113,6 @@ public class Node extends Thread {
         else if(msg.getType().equals("search_result")) {
             @SuppressWarnings("unchecked")
             HashMap<String, String> content = msg.getContent();
-            System.out.println("result received: " + content.get("search_result") + " from " + msg.getSender());
 
             /*
             If the search is initiated by us,
@@ -121,7 +120,9 @@ public class Node extends Thread {
             since we got a result, stop the agent.
              */
             String search_id = content.get("search_id");
+            //System.out.println("id:peers : " + _search_keeper._search_peers);
             if (_search_agents.containsKey(search_id)) {
+                System.out.println("result received: " + content.get("search_result") + " from " + msg.getSender());
                 SearchAgent sa = _search_agents.get(search_id);
                 sa.terminate();
                 //TODO: display results properly
@@ -132,6 +133,7 @@ public class Node extends Thread {
             if its there, forward to the peer,
              */
             else if (_search_keeper.has(search_id)) {
+                //System.out.println("got a relayed search result from " + msg.getSender());
                 if (_search_keeper.has_peer_for(search_id)) {
                     _connector.send_message(msg, _search_keeper.get_peer(search_id));
                 }

@@ -148,6 +148,15 @@ public class Node extends Thread {
                // do nothing
             }
         } //end *search_result* handling
+
+        else if (msg.getType().equals("bye")) {
+            /*
+            when we get a "bye" message from a node,
+            that node is exiting, bye is the last message.
+            So remove that node from Connector.
+             */
+            _connector.remove_neighbour(msg.getSender());
+        }
     }
 
     public String local_search(String query) {
@@ -211,13 +220,25 @@ public class Node extends Thread {
         else if(cmd.equals("nodes")) {
             System.out.println(_connector._node_lookup.keySet());
         }
+        else if(cmd.equals("bye")) {
+            cleanup();
+        }
         else {
         }
+    }
+
+    public void cleanup() {
+        _connector.cleanup();
     }
 
     @Override
     public void run() {
         take_commands();
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                cleanup();
+            }
+        });
     }
 
     public static void main(String args[]) {

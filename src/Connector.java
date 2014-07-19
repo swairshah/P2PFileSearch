@@ -24,6 +24,13 @@ public class Connector extends Thread {
         _outstreams = new ConcurrentHashMap<>();
     }
 
+    public void remove_neighbour(NodeInfo n) {
+        int id = _node_lookup.get(n.toString());
+        _outstreams.remove(id);
+        _cli_socks.remove(id);
+        _node_lookup.remove(n.toString());
+    }
+
     public void send_neighbours(Message msg) {
         for (String n_str : _node_lookup.keySet()) {
             NodeInfo n = new NodeInfo(n_str);
@@ -61,7 +68,7 @@ public class Connector extends Thread {
             System.out.println("join from "+msg.getSender());
             neighbour_joined(msg.getSender());
         }
-        else if (msg.getType().startsWith("search")) {
+        else {
             _node_ref.process_msg(msg);
         }
     }
@@ -110,12 +117,42 @@ public class Connector extends Thread {
             ex.printStackTrace();
         }
     }
+    public void cleanup() {
+        Message bye_msg = new Message.MessageBuilder()
+                .from(_node_ref._info)
+                .type("bye")
+                .build();
+        send_neighbours(bye_msg);
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+
+        /*
+        for(ListenerThread t : _listener_threads) {
+            t.cleanup();
+        }
+
+        for (int id : _cli_socks.keySet()) {
+            Socket s = _cli_socks.get(id);
+            OutputStream o = _outstreams.get(id);
+            try {
+                o.close();
+                s.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        */
+    }
     @Override
     public void run() {
         try (ServerSocket server = new ServerSocket(_node_ref._info.port)) {
             while(true) {
                 Socket client = server.accept();
-                Thread listener = new ListenerThread(client,this);
+                ListenerThread listener = new ListenerThread(client,this);
                 listener.start();
             }
         } catch (IOException ex) {

@@ -10,6 +10,7 @@ public class Node extends Thread {
     public String _datafile = "metafile";
     private SearchKeeper _search_keeper;
     private FileSearch _file_search;
+    public int _node_id;
     /*
     _search_agents stores UUID(strings) : SearchAgent object
     for that search
@@ -25,6 +26,10 @@ public class Node extends Thread {
         _search_keeper.start();
 
         _file_search = new FileSearch(_datafile);
+    }
+
+    public void set_id(int id) {
+        _node_id = id;
     }
 
     public synchronized void take_commands() {
@@ -244,5 +249,9 @@ public class Node extends Thread {
     public static void main(String args[]) {
         Node node = new Node(new NodeInfo(args[0]));
         node.start();
+        if (args.length == 2) {
+            node.set_id(Integer.parseInt(args[1]));
+        }
+
     }
 }

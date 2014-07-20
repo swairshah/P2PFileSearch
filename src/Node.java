@@ -11,6 +11,7 @@ public class Node extends Thread {
     private SearchKeeper _search_keeper;
     private FileSearch _file_search;
     public int _node_id;
+    private boolean _am_i_leaving = false;
     /*
     _search_agents stores UUID(strings) : SearchAgent object
     for that search
@@ -162,6 +163,18 @@ public class Node extends Thread {
              */
             _connector.remove_neighbour(msg.getSender());
         }
+
+        else if (msg.getType().equals("can_i_leave")) {
+
+        }
+
+        else if (msg.getType().equals("you_can_leave")) {
+
+        }
+
+        else if (msg.getType().equals("no_you_cannot")) {
+
+        }
     }
 
     public String local_search(String query) {
@@ -219,14 +232,23 @@ public class Node extends Thread {
             _search_agents.put(search_agent._search_id.toString(), search_agent);
             search_agent.start();
         }
-        else if (cmd.startsWith("leave")) {
-
-        }
         else if(cmd.equals("nodes")) {
             System.out.println(_connector._node_lookup.keySet());
         }
         else if(cmd.equals("bye")) {
             cleanup();
+        }
+        else if(cmd.equals("leave")) {
+            _am_i_leaving = true;
+            /*
+            TODO:
+            send can_i_leave message, wait for yes/no.
+            (can_i_leave message should contain node_id with it)
+            if yes from all neighbour,
+                choose a neighbour at random, send join_these_nodes message to it
+            else
+                wait for 1 second and repeat the process
+             */
         }
         else {
         }

@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Node extends Thread {
@@ -12,6 +9,7 @@ public class Node extends Thread {
     private FileSearch _file_search;
     public int _node_id;
     private boolean _am_i_leaving = false;
+    private List<NodeInfo> _leave_acks;
     /*
     _search_agents stores UUID(strings) : SearchAgent object
     for that search
@@ -27,6 +25,8 @@ public class Node extends Thread {
         _search_keeper.start();
 
         _file_search = new FileSearch(_datafile);
+
+        _leave_acks = new ArrayList<>();
     }
 
     public void set_id(int id) {
@@ -165,11 +165,25 @@ public class Node extends Thread {
         }
 
         else if (msg.getType().equals("can_i_leave")) {
-
+            if(_am_i_leaving) {
+                Message reply_msg = new Message.MessageBuilder()
+                    .type("no_you_cannot")
+                    .from(_info)
+                    .to(msg.getSender())
+                    .build();
+                _connector.send_message(reply_msg,msg.getSender());
+            }
+            else {
+                Message reply_msg = new Message.MessageBuilder()
+                    .type("yes_you_can")
+                    .to(msg.getSender())
+                    .from(_info).build();
+                _connector.send_message(reply_msg,msg.getSender());
+            }
         }
 
-        else if (msg.getType().equals("you_can_leave")) {
-
+        else if (msg.getType().equals("yes_you_can")) {
+            _leave_acks.add(msg.getSender());
         }
 
         else if (msg.getType().equals("no_you_cannot")) {
@@ -240,6 +254,11 @@ public class Node extends Thread {
         }
         else if(cmd.equals("leave")) {
             _am_i_leaving = true;
+
+            Message leave_msg = new Message.MessageBuilder()
+                    .type("yes_you_can")
+                    .from(_info).build();
+            _connector.send_neighbours(leave_msg);
             /*
             TODO:
             send can_i_leave message, wait for yes/no.
@@ -252,6 +271,10 @@ public class Node extends Thread {
         }
         else {
         }
+    }
+
+    public boolean ready_to_leave() {
+        return false;
     }
 
     public void cleanup() {

@@ -90,7 +90,7 @@ public class Connector extends Thread {
     }
     public synchronized void join_neighbour(NodeInfo n) {
         if (_node_lookup.containsKey(n.toString())) {
-            System.err.println("connected to"+n.ip);
+            System.err.println("already connected to"+n.ip);
             System.out.print("> ");
             return;
         }

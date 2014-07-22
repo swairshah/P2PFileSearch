@@ -9,7 +9,7 @@ public class Node extends Thread {
     private FileSearch _file_search;
     public int _node_id;
     private boolean _am_i_leaving = false;
-    private List<NodeInfo> _leave_acks;
+    private List<String> _leave_acks;
     /*
     _search_agents stores UUID(strings) : SearchAgent object
     for that search
@@ -43,11 +43,10 @@ public class Node extends Thread {
     }
 
     public void process_msg(Message msg) {
-        System.out.println("got msg "+ msg.getType());
+        System.out.println("got msg "+ msg.getType() + " from " + msg.getSender());
 
         if (msg.getType().equals("search")) {
-            @SuppressWarnings("unchecked")
-            HashMap<String, String> content = msg.getContent();
+            @SuppressWarnings("unchecked") HashMap<String, String> content = msg.getContent();
             System.out.println(content);
             if (_search_keeper.has(content.get("search_id"))) {
                 /*
@@ -183,11 +182,27 @@ public class Node extends Thread {
         }
 
         else if (msg.getType().equals("yes_you_can")) {
-            _leave_acks.add(msg.getSender());
+            _leave_acks.add(msg.getSender().toString());
         }
 
         else if (msg.getType().equals("no_you_cannot")) {
 
+        }
+
+        else if (msg.getType().equals("neighbours_data")) {
+            @SuppressWarnings("unchecked")
+            HashMap<String, String> content = msg.getContent();
+
+            String neighbours = content.get("neighbours");
+            String nodes[] = neighbours.split(",");
+
+            for(String n : nodes) {
+                if (!n.equals(_info.toString())) {
+                    if(!_connector._node_lookup.containsKey(n)) {
+                       _connector.join_neighbour(new NodeInfo(n));
+                    }
+                }
+            }
         }
     }
 
@@ -253,28 +268,92 @@ public class Node extends Thread {
             cleanup();
         }
         else if(cmd.equals("leave")) {
+            /*
+            start leaving protocol,
+            set _am_i_leaving as true;
+             */
             _am_i_leaving = true;
 
             Message leave_msg = new Message.MessageBuilder()
-                    .type("yes_you_can")
-                    .from(_info).build();
-            _connector.send_neighbours(leave_msg);
+                .type("can_i_leave")
+                .from(_info).build();
+
             /*
-            TODO:
-            send can_i_leave message, wait for yes/no.
-            (can_i_leave message should contain node_id with it)
-            if yes from all neighbour,
-                choose a neighbour at random, send join_these_nodes message to it
-            else
-                wait for 1 second and repeat the process
+            send leave_msg to all the nodes from which
+            we haven't received an ack,
+            (we are setting timeout to be 1 second,
+            if the acks haven't arrived till then we resend the
+            leave_msg)
              */
+            while(!ready_to_leave()) {
+                /*
+                send message to all neighbours except
+                the ones in _leave_acks
+                 */
+                for(String n : _connector._node_lookup.keySet()) {
+                    if (!_leave_acks.contains(n)) {
+                       _connector.send_message(leave_msg, new NodeInfo(n));
+                    }
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+            _am_i_leaving = false;
+            _leave_acks.clear();
+
+            /* now that we have all acks, and
+            we are ready to leave,
+            randomly select a neighbour and send it
+            the NodeInfo strings for rest of the
+            neighbours
+             */
+
+
+            String all_neighbours[] = _connector._node_lookup
+                    .keySet()
+                    .toArray(new String[0]);
+
+            int rand = (int) Math.random()*all_neighbours.length;
+            String chosen_node = all_neighbours[rand];
+
+            HashMap<String, String> content = new HashMap<>();
+
+            String data = "";
+            for (String s : all_neighbours) {
+                data += s + ",";
+            }
+
+            content.put("neighbours", data);
+
+            Message neighbours_data = new Message.MessageBuilder()
+                .type("neighbours_data")
+                .content(content)
+                .from(_info).build();
+
+            _connector.send_message(neighbours_data, new NodeInfo(chosen_node));
+
+            cleanup();
+
         }
         else {
         }
     }
 
-    public boolean ready_to_leave() {
-        return false;
+    public synchronized boolean ready_to_leave() {
+        ConcurrentHashMap<String,Integer> neighbours = new ConcurrentHashMap<>(_connector._node_lookup);
+        Set<String> pending = neighbours.keySet();
+
+        System.out.println(_leave_acks);
+        for(String n : pending) {
+            if(_leave_acks.contains(n)) {
+               pending.remove(n);
+            }
+        }
+        return pending.isEmpty();
     }
 
     public void cleanup() {

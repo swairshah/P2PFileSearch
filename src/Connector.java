@@ -94,6 +94,14 @@ public class Connector extends Thread {
             System.out.print("> ");
             return;
         }
+
+        /*
+        Don't join yourself!
+         */
+        if (n.toString().equals(_node_ref._info.toString())) {
+            System.out.println("Can't join yourself!");
+            return;
+        }
         try {
             Socket sock = new Socket(n.ip, n.port);
             OutputStream outstream = sock.getOutputStream();

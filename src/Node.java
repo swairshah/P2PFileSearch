@@ -250,7 +250,6 @@ public class Node extends Thread {
                 System.out.println(help_msg);
             }
             else {
-                System.out.println("joining "+parts[1]);
                 _connector.join_neighbour(new NodeInfo(parts[1]));
             }
         }

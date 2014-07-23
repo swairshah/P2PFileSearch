@@ -160,6 +160,11 @@ public class Node extends Thread {
             that node is exiting, bye is the last message.
             So remove that node from Connector.
              */
+            Message bye_msg = new Message.MessageBuilder()
+                .from(_info)
+                .type("bye")
+                .build();
+            _connector.send_message(bye_msg,msg.getSender());
             _connector.remove_neighbour(msg.getSender());
         }
 
@@ -264,7 +269,7 @@ public class Node extends Thread {
             System.out.println(_connector._node_lookup.keySet());
         }
         else if(cmd.equals("bye")) {
-            cleanup();
+            say_bye();
         }
         else if(cmd.equals("leave")) {
             /*
@@ -335,7 +340,7 @@ public class Node extends Thread {
 
             _connector.send_message(neighbours_data, new NodeInfo(chosen_node));
 
-            cleanup();
+            say_bye();
 
         }
         else {
@@ -355,8 +360,12 @@ public class Node extends Thread {
         return pending.isEmpty();
     }
 
-    public void cleanup() {
-        _connector.cleanup();
+    public void say_bye() {
+        Message bye_msg = new Message.MessageBuilder()
+                .from(_info)
+                .type("bye")
+                .build();
+        _connector.send_neighbours(bye_msg);
     }
 
     @Override
@@ -364,7 +373,7 @@ public class Node extends Thread {
         take_commands();
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
-                cleanup();
+                say_bye();
             }
         });
     }

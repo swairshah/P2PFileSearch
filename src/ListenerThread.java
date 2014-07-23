@@ -40,15 +40,39 @@ public class ListenerThread extends Thread {
                 ObjectInputStream obj_in = new ObjectInputStream(_instream);
                 Message msg = (Message) obj_in.readObject();
                 /*
+                BYE PROTOCOL:
                  when a bye message is received,
-                 terminate the thread, as there will be no further
-                 message from node at the other end of the connection
+                    send a bye_ack message to sender,
+                    termincate the current listener thread,
+                    remove the sender of bye from _node_loookup
+
+                 when a bye_ack is received:
+                    terminate the listener thread.
+                    remove the sender of bye from _node_loookup
                   */
                 if(msg.getType().equals("bye")) {
+                    Message bye_ack = new Message.MessageBuilder()
+                        .from(_connector_ref._node_ref._info)
+                        .type("bye_ack")
+                        .build();
+                    _connector_ref.send_message(bye_ack,msg.getSender());
                     obj_in.close();
                     terminate();
+
+                    _connector_ref._node_lookup.remove(msg.getSender().toString());
                 }
-                _connector_ref.deliver_msg(msg);
+                else if (msg.getType().equals("bye_ack")) {
+                    obj_in.close();
+                    terminate();
+                    _connector_ref._node_lookup.remove(msg.getSender().toString());
+                }
+                /*
+                Only bye protocol is handled inside the listener thread,
+                other messages are passed on to the connector.
+                 */
+                else {
+                    _connector_ref.deliver_msg(msg);
+                }
             } catch(IOException | ClassNotFoundException ex) {
                 ex.printStackTrace();
             }

@@ -2,18 +2,22 @@
 % Swair Shah, Miren Tanna
 % 22-July-2014
 
-## System Overview
+# System Overview
 
-### Message Types
+## Message Types
 A node can send/receive the following types of messages:
 
-1. Join 
-2. Leave
-3. Search
-4. Search_Result
-5. Fetch 
+1. join 
+2. fetch 
+3. search
+4. search_result
+5. bye
+6. bye_ack
+7. can_i_leave
+8. yes_you_can
+9. no_you_cannot
 
-#### Join
+### Join
 A `Join` message contains message type `join`, sender and receiver
 `NodeInfo`. 
 

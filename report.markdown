@@ -28,7 +28,24 @@ The sender, N1 sends a `Join` message to N2. Then N1 adds N2 to its
 The message on the receiving end (N2) of this a `Join` message in turn
 adds N1 to its `_neighbours` list and establishes a TCP connection to it.
 
-#### Leave
+### Leave
+#### Bye protocol
+
+`Bye protocol` deals with closing of listener threads.
+It is the last thing done as a part of Leave protocol.
+It is handled in listener threads, and not passed on to 
+`Connector` or `Node` class.
+
+```
+ if (message type is bye)
+    send(bye_ack message to sender)
+    terminate the current listener thread
+    remove (sender from _node_loookup)
+
+ if (message type is bye_ack)
+    terminate the current listener thread
+    remove (sender from _node_loookup)
+```
 
 #### Search
 A `Search` message contains 

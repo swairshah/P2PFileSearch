@@ -383,12 +383,13 @@ public class Node extends Thread {
         else if (cmd.contains("fetch")){
             /*TODO: Updating metafile with keywords*/
             //Requested files assumed to be of *.txt format
+
             String fetch_request[]=cmd.split(" ");
             String ip_port[] = fetch_request[2].split(":");
 
             int port = Integer.parseInt(ip_port[1]) + (int)(Math.random()*(20)+2);
             HashMap<String, String> content = new HashMap<>();
-            content.put("file_name", fetch_request[1] + ".txt");
+            content.put("file_name", fetch_request[1]);
             content.put("port", port + "");
 
             try{
@@ -413,7 +414,7 @@ public class Node extends Thread {
                 byte [] bytearray = new byte [filesize];
 
                 InputStream is = socket.getInputStream();
-                FileOutputStream fos = new FileOutputStream(fetch_request[1] + ".txt", true);
+                FileOutputStream fos = new FileOutputStream(fetch_request[1], true);
                 BufferedOutputStream bos = new BufferedOutputStream(fos);
 
                 bytesRead = is.read(bytearray,0,bytearray.length);

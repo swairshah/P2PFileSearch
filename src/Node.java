@@ -381,7 +381,7 @@ public class Node extends Thread {
         }
 
         else if (cmd.contains("fetch")){
-            /*TODO: Updating metafile*/
+            /*TODO: Updating metafile with keywords*/
             //Requested files assumed to be of *.txt format
             String fetch_request[]=cmd.split(" ");
             String ip_port[] = fetch_request[2].split(":");

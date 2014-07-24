@@ -1,6 +1,3 @@
-import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -212,37 +209,6 @@ public class Node extends Thread {
                 }
             }
         }
-
-        else if(msg.getType().equals("temp_connection")){
-
-            HashMap<String, String> content = msg.getContent();
-            File transferFile = new File(content.get("file_name"));
-            System.out.println(content.get("file_name"));
-
-            try {
-                ServerSocket serverSocket = new ServerSocket(Integer.parseInt(content.get("port")));
-                while(true) {
-                    Socket socket = serverSocket.accept();
-                    byte[] bytearray = new byte[(int) transferFile.length()];
-
-                    FileInputStream fin = new FileInputStream(transferFile);
-                    BufferedInputStream bin = new BufferedInputStream(fin);
-
-                    bin.read(bytearray, 0, bytearray.length);
-                    OutputStream os = socket.getOutputStream();
-
-                    System.out.println("Sending File");
-                    os.write(bytearray, 0, bytearray.length);
-
-                    os.flush();
-                    socket.close();
-                    System.out.println("File transfer complete");
-                }
-            }
-            catch (IOException ex){
-                ex.printStackTrace();
-            }
-        }
     }
 
     public String local_search(String query) {
@@ -267,11 +233,9 @@ public class Node extends Thread {
                         "%-20s\t:\t%s\n" +
                         "%-20s\t:\t%s\n" +
                         "%-20s\t:\t%s\n" +
-                        "%-20s\t:\t%s\n" +
                         "%-20s\t:\t%s\n",
                 "Following Commands are supported:",
                 "help","Prints this help",
-                "fetch <filename> <ip>:<port>", "Fetches file from <ip>",
                 "join <ip>:<port>","Join the cluser of node with <ip> listening on <port>",
                 "leave","leave from cluster(s)",
                 "search <keywords>","search for a file");
@@ -379,65 +343,7 @@ public class Node extends Thread {
             say_bye();
 
         }
-
-        else if (cmd.contains("fetch")){
-            /*TODO: Updating metafile*/
-            //Requested files assumed to be of *.txt format
-            String fetch_request[]=cmd.split(" ");
-            String ip_port[] = fetch_request[2].split(":");
-
-            int port = Integer.parseInt(ip_port[1]) + (int)(Math.random()*(20)+2);
-            HashMap<String, String> content = new HashMap<>();
-            content.put("file_name", fetch_request[1] + ".txt");
-            content.put("port", port + "");
-
-            try{
-                Socket sock = new Socket(ip_port[0], Integer.parseInt(ip_port[1]));
-                OutputStream outputStream = sock.getOutputStream();
-                ObjectOutputStream objectOutputStream =new ObjectOutputStream(outputStream);
-
-                Message temp_connection= new Message.MessageBuilder()
-                        .type("temp_connection")
-                        .content(content)
-                        .from(_info).build();
-
-                objectOutputStream.writeObject(temp_connection);
-                objectOutputStream.flush();
-
-                Thread.sleep(1000);
-                int filesize= 99999;
-                int bytesRead;
-                int currentTot = 0;
-
-                Socket socket = new Socket(ip_port[0],port);
-                byte [] bytearray = new byte [filesize];
-
-                InputStream is = socket.getInputStream();
-                FileOutputStream fos = new FileOutputStream(fetch_request[1] + ".txt", true);
-                BufferedOutputStream bos = new BufferedOutputStream(fos);
-
-                bytesRead = is.read(bytearray,0,bytearray.length);
-                currentTot = bytesRead;
-
-                do {
-                    bytesRead = is.read(bytearray, currentTot, (bytearray.length-currentTot));
-                    if(bytesRead >= 0)
-                        currentTot += bytesRead;
-
-                } while(bytesRead > -1);
-                bos.write(bytearray, 0, currentTot);
-
-                bos.flush();
-                bos.close();
-                socket.close();
-            }
-            catch(IOException ex){
-                ex.printStackTrace();
-            }
-            catch(InterruptedException ex){
-                ex.printStackTrace();
-            }
-            System.out.println("File transfer complete");
+        else {
         }
     }
 

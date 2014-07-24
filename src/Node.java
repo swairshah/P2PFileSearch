@@ -9,7 +9,6 @@ public class Node extends Thread {
     public Connector _connector;
     public String _datafile = "metafile";
     private SearchKeeper _search_keeper;
-    private FileSearch _file_search;
     public int _node_id;
     private boolean _am_i_leaving = false;
     private List<String> _leave_acks;
@@ -27,7 +26,6 @@ public class Node extends Thread {
         _search_keeper = new SearchKeeper(this);
         _search_keeper.start();
 
-        _file_search = new FileSearch(_datafile);
 
         _leave_acks = new ArrayList<>();
     }
@@ -246,8 +244,9 @@ public class Node extends Thread {
     }
 
     public String local_search(String query) {
+        FileSearch file_search = new FileSearch(_datafile);
         @SuppressWarnings("unchecked")
-        ArrayList<String> results =_file_search.search(query);
+        ArrayList<String> results = file_search.search(query);
         if (results.isEmpty()) {
             return "";
         }

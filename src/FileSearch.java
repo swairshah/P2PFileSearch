@@ -9,6 +9,21 @@ public class FileSearch {
         _filename = filename;
     }
 
+    public synchronized String get_metadata(String filename) {
+        String line;
+        String metadata = "";
+        try(BufferedReader reader = new BufferedReader(new FileReader(_filename))) {
+            while((line = reader.readLine()) != null) {
+                if(search_line(line, filename)) {
+                    metadata = line.split(" ")[1];
+                }
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return metadata;
+    }
+
     public synchronized boolean search_line(String line, String query) {
         if(line.contains(query)) {
             return true;
@@ -38,6 +53,6 @@ public class FileSearch {
 
     public static void main(String args[]) {
         FileSearch f = new FileSearch(args[0]);
-        System.out.println(f.search(args[1]));
+        System.out.println(f.get_metadata(args[1]));
     }
 }

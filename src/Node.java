@@ -127,8 +127,10 @@ public class Node extends Thread {
             String search_id = content.get("search_id");
             //System.out.println("id:peers : " + _search_keeper._search_peers);
             if (_search_agents.containsKey(search_id)) {
-                System.out.println("result received: " + content.get("search_result") + " from " + msg.getSender());
                 SearchAgent sa = _search_agents.get(search_id);
+                System.out.println("result received: " +
+                        sa._search_term + " ," +
+                        content.get("search_result") + " " + msg.getSender());
                 sa.terminate();
                 //TODO: display results properly
             }

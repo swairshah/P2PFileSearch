@@ -5,17 +5,14 @@ import java.net.Socket;
  * Created by swair on 7/25/14.
  */
 public class FileTransfer extends Thread {
-    private FileServer _fileserver_ref;
     private Socket _client;
     public FileTransfer(Socket client, FileServer fs) {
         _client = client;
-        _fileserver_ref = fs;
     }
 
     public static void copyStream(InputStream input, OutputStream output)
-            throws IOException
-    {
-        byte[] buffer = new byte[1024]; // Adjust if you want
+            throws IOException {
+        byte[] buffer = new byte[1024];
         int bytesRead;
         while ((bytesRead = input.read(buffer)) != -1)
         {
@@ -26,7 +23,6 @@ public class FileTransfer extends Thread {
     @Override
     public void run() {
         try {
-
             InputStreamReader sin = new InputStreamReader(_client.getInputStream());
             BufferedReader read = new BufferedReader(sin);
             String filename = read.readLine().trim();

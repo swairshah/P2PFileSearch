@@ -170,7 +170,15 @@ public class Node extends Thread {
         }
 
         else if (msg.getType().equals("can_i_leave")) {
-            if(_am_i_leaving) {
+            @SuppressWarnings("unchecked")
+            HashMap<String, String> content = msg.getContent();
+            int their_id = Integer.parseInt(content.get("node_id"));
+
+            /*
+            say no, if we are trying to leave AND
+            our node_id is smaller than theirs.
+             */
+            if(_am_i_leaving && their_id > _node_id) {
                 Message reply_msg = new Message.MessageBuilder()
                     .type("no_you_cannot")
                     .from(_info)
@@ -313,8 +321,11 @@ public class Node extends Thread {
              */
             _am_i_leaving = true;
 
+            HashMap<String, String> payload = new HashMap<>();
+            payload.put("node_id",Integer.toString(_node_id));
             Message leave_msg = new Message.MessageBuilder()
                 .type("can_i_leave")
+                .content(payload)
                 .from(_info).build();
 
             /*

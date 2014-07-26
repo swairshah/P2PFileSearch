@@ -6,7 +6,7 @@ import java.net.Socket;
  * Created by swair on 7/25/14.
  */
 public class FileServer extends Thread {
-    private Node _node_ref;
+    public Node _node_ref;
     public FileServer(Node n) {
         _node_ref = n;
     }

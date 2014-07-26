@@ -6,8 +6,10 @@ import java.net.Socket;
  */
 public class FileTransfer extends Thread {
     private Socket _client;
+    private FileServer _fileserver_ref;
     public FileTransfer(Socket client, FileServer fs) {
         _client = client;
+        _fileserver_ref = fs;
     }
 
     public static void copyStream(InputStream input, OutputStream output)
@@ -26,6 +28,15 @@ public class FileTransfer extends Thread {
             InputStreamReader sin = new InputStreamReader(_client.getInputStream());
             BufferedReader read = new BufferedReader(sin);
             String filename = read.readLine().trim();
+
+            OutputStream outstream = _client.getOutputStream();
+            OutputStreamWriter writer = new OutputStreamWriter(outstream,"UTF-8");
+
+            FileSearch file_search = new FileSearch(_fileserver_ref._node_ref._datafile);
+            String metadata = file_search.get_metadata(filename);
+            writer.write(metadata);
+            writer.write("\r\n");
+            writer.flush();
 
             FileInputStream fin = new FileInputStream(filename);
             BufferedInputStream bin = new BufferedInputStream(fin);

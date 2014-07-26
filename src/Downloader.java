@@ -33,6 +33,10 @@ public class Downloader extends Thread {
             writer.write("\r\n");
             writer.flush();
 
+            InputStreamReader sin = new InputStreamReader(socket.getInputStream());
+            BufferedReader read = new BufferedReader(sin);
+            String metadata = read.readLine().trim();
+
             InputStream is = socket.getInputStream();
             FileOutputStream fos = new FileOutputStream(_filename);
             copyStream(is,fos);

@@ -3,6 +3,7 @@ import java.net.Socket;
 
 public class Downloader extends Thread {
 
+    public String _datafile = "metafile";
     private String _filename;
     private int _server_port;
     private String _server_ip;
@@ -22,6 +23,7 @@ public class Downloader extends Thread {
         }
     }
 
+
     @Override
     public void run() {
         try {
@@ -35,7 +37,12 @@ public class Downloader extends Thread {
 
             InputStreamReader sin = new InputStreamReader(socket.getInputStream());
             BufferedReader read = new BufferedReader(sin);
-            String metadata = read.readLine().trim();
+            String metadata = _filename + " " + read.readLine().trim() + System.lineSeparator();
+
+            FileOutputStream fos2 = new FileOutputStream(_datafile, true);
+            byte metadata_content[]= metadata.getBytes();
+            fos2.write(metadata_content);
+            fos2.close();
 
             InputStream is = socket.getInputStream();
             FileOutputStream fos = new FileOutputStream(_filename);

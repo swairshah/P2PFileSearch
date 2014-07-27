@@ -12,7 +12,6 @@ public class FileServer extends Thread {
     }
     @Override
     public void run() {
-        System.out.println("starting file server");
         try (ServerSocket server = new ServerSocket(_node_ref._fileserver_port)) {
             while(true) {
                 Socket client = server.accept();

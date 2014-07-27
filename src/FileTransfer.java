@@ -29,24 +29,26 @@ public class FileTransfer extends Thread {
             BufferedReader read = new BufferedReader(sin);
             String filename = read.readLine().trim();
 
-            OutputStream outstream = _client.getOutputStream();
-            OutputStreamWriter writer = new OutputStreamWriter(outstream,"UTF-8");
+           if(new File(filename).exists()){
+               OutputStream outstream = _client.getOutputStream();
+               OutputStreamWriter writer = new OutputStreamWriter(outstream,"UTF-8");
 
-            FileSearch file_search = new FileSearch(_fileserver_ref._node_ref._datafile);
-            String metadata = file_search.get_metadata(filename);
-            writer.write(metadata);
-            writer.write("\r\n");
-            writer.flush();
+               FileSearch file_search = new FileSearch(_fileserver_ref._node_ref._datafile);
+               String metadata = file_search.get_metadata(filename);
+               writer.write(metadata);
+               writer.write("\r\n");
+               writer.flush();
 
-            FileInputStream fin = new FileInputStream(filename);
-            BufferedInputStream bin = new BufferedInputStream(fin);
+               FileInputStream fin = new FileInputStream(filename);
+                BufferedInputStream bin = new BufferedInputStream(fin);
 
-            OutputStream os = _client.getOutputStream();
-            copyStream(bin,os);
+                OutputStream os = _client.getOutputStream();
+                copyStream(bin,os);
 
-            os.flush();
-            _client.close();
-            System.out.println("File transfer complete");
+                os.flush();
+                _client.close();
+                System.out.println("File transfer complete");
+            }
         } catch(IOException ex) {
             ex.printStackTrace();
         }

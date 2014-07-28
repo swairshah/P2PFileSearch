@@ -337,6 +337,13 @@ public class Node extends Thread {
         }
         else if(cmd.equals("leave")) {
             /*
+            if node doesn't have any neighbours,
+            just return
+             */
+            if (_connector._node_lookup.isEmpty()) {
+                return;
+            }
+            /*
             start leaving protocol,
             set _am_i_leaving as true;
              */

@@ -136,13 +136,17 @@ It is handled in listener threads, and not passed on to
     remove (sender from _node_loookup)
 ```
 
-#### Search
+### Search
+The implementation of search procedure in Node class has
+two important parts, one is the `SearchAgent` and other is 
+`SearchKeeper`.
+
 A `Search` message contains 
 * message type `search`, 
 * `NodeInfo` of sender, receiver, initiator
 * current hopcount for the query 
 * UUID of the search (which the initiator sets)
 
-#### Search_Result
+### Search_Result
 
 

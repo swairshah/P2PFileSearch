@@ -2,6 +2,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class FileSearch {
     private String _filename;
@@ -25,7 +27,8 @@ public class FileSearch {
     }
 
     public synchronized boolean search_line(String line, String query) {
-        if(line.contains(query)) {
+        List<String> search_arr = Arrays.asList(line.split("(,)|( )"));
+        if(search_arr.contains(query)) {
             return true;
         }
         else {
@@ -53,6 +56,6 @@ public class FileSearch {
 
     public static void main(String args[]) {
         FileSearch f = new FileSearch(args[0]);
-        System.out.println(f.get_metadata(args[1]));
+        System.out.println(f.search(args[1]));
     }
 }

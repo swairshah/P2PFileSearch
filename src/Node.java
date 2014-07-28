@@ -87,9 +87,9 @@ public class Node extends Thread {
             }
 
              /*
-             forward msg to neighbours is hop_count != 0
+             forward msg to neighbours is hop_count != 1
              */
-            if (Integer.parseInt(content.get("hop_count")) == 0) {
+            if (Integer.parseInt(content.get("hop_count")) <= 1) {
                 /* Don't forward the message */
             }
             else {

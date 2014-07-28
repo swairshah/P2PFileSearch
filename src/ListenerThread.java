@@ -74,7 +74,8 @@ public class ListenerThread extends Thread {
                     _connector_ref.deliver_msg(msg);
                 }
             } catch(IOException | ClassNotFoundException ex) {
-                ex.printStackTrace();
+                System.out.println("StreamException");
+                terminate();
             }
         }
     }

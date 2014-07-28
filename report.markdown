@@ -85,7 +85,8 @@ while(!ready_to_leave()) {
 
 ```java
 public synchronized boolean ready_to_leave() {
-    ConcurrentHashMap<String,Integer> neighbours = new ConcurrentHashMap<>(_connector._node_lookup);
+    ConcurrentHashMap<String,Integer> neighbours = 
+        new ConcurrentHashMap<>(_connector._node_lookup);
     Set<String> pending = neighbours.keySet();
 
     System.out.println(_leave_acks);

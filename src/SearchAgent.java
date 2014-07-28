@@ -9,8 +9,10 @@ public class SearchAgent extends Thread {
     public final String _search_term;
     private int _t_out = 1000; //Milliseconds
     private int _hop_count = 1;
+    private int _last_hopcount = _hop_count;
     public boolean _running = true;
     public UUID _search_id;
+    public long _start_time = System.currentTimeMillis();
 
     public SearchAgent(String search_term, Node node_ref) {
         _search_term = search_term;
@@ -19,6 +21,15 @@ public class SearchAgent extends Thread {
     }
 
     public void terminate() {
+        long end_time = System.currentTimeMillis();
+        long dt = end_time - _start_time;
+        String timelog_line = String.format("%-12s %-12s\n",_search_term,dt);
+        if (_last_hopcount >= 16) {
+            _last_hopcount = -1;
+        }
+        String logline = String.format("%-12s %-12s\n", _search_term, _last_hopcount);
+        _node_ref._hop_log.add(logline);
+        _node_ref._time_log.add(timelog_line);
         _running = false;
     }
 
@@ -56,6 +67,7 @@ public class SearchAgent extends Thread {
          */
         while(_running && _hop_count <= 16) {
             search();
+            _last_hopcount = _hop_count;
             _hop_count = _hop_count*2;
             try {
                 Thread.sleep(_t_out*_hop_count);

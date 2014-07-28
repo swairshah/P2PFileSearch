@@ -21,15 +21,11 @@ public class SearchAgent extends Thread {
     }
 
     public void terminate() {
-        long end_time = System.currentTimeMillis();
-        long dt = end_time - _start_time;
-        String timelog_line = String.format("%-12s %-12s\n",_search_term,dt);
         if (_last_hopcount >= 16) {
             _last_hopcount = -1;
         }
-        String logline = String.format("%-12s %-12s\n", _search_term, _last_hopcount);
+        String logline = String.format("%-20s %-12s %-12s\n", _search_id, _search_term, _last_hopcount);
         _node_ref._hop_log.add(logline);
-        _node_ref._time_log.add(timelog_line);
         _running = false;
     }
 

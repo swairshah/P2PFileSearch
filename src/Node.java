@@ -14,6 +14,7 @@ public class Node extends Thread {
     public int _fileserver_port;
     private boolean _am_i_leaving = false;
     private List<String> _leave_acks;
+    private ConcurrentHashMap<String, Long> _start_times;
 
     public List<String> _hop_log = Collections.synchronizedList(new ArrayList<String>());
     public List<String> _time_log = Collections.synchronizedList(new ArrayList<String>());
@@ -49,7 +50,7 @@ public class Node extends Thread {
             ex.printStackTrace();
         }
         try {
-            Writer log_writer = new PrintWriter(new FileWriter("time_log.log"));
+            Writer log_writer = new PrintWriter(new FileWriter("time.log"));
             log_writer.append("");
             log_writer.close();
         } catch(IOException ex) {
@@ -181,6 +182,12 @@ public class Node extends Thread {
                 System.out.println("result received: " +
                         sa._search_term + " ," +
                         content.get("search_result") + " " + msg.getSender());
+
+                long end_time = System.currentTimeMillis();
+                long diff = end_time - sa._start_time;
+                String logline = String.format("%-20s %-12s %-12s\n", sa._search_id, sa._search_term, diff);
+                _time_log.add(logline);
+
                 sa.terminate();
                 //TODO: display results properly
             }
@@ -327,6 +334,10 @@ public class Node extends Thread {
             String search_term = parts[1];
             SearchAgent search_agent = new SearchAgent(search_term,this);
             _search_agents.put(search_agent._search_id.toString(), search_agent);
+
+            long start_time = System.currentTimeMillis();
+            _start_times.put(search_agent._search_id.toString(),start_time);
+
             search_agent.start();
         }
         else if(cmd.equals("nodes")) {

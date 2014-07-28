@@ -15,6 +15,8 @@ A node can send/receive the following types of messages:
 6. bye_ack
 7. can_i_leave
 8. yes_you_can
+9. 
+
 
 ### Join
 A `Join` message contains message type `join`, sender and receiver
@@ -136,13 +138,15 @@ It is handled in listener threads, and not passed on to
     remove (sender from _node_loookup)
 ```
 
-#### Search
+### Search
 A `Search` message contains 
 * message type `search`, 
 * `NodeInfo` of sender, receiver, initiator
 * current hopcount for the query 
 * UUID of the search (which the initiator sets)
 
-#### Search_Result
+#### Local FileSearch
+
+### Search_Result
 
 

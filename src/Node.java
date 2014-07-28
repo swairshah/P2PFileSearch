@@ -1,3 +1,7 @@
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -10,6 +14,9 @@ public class Node extends Thread {
     public int _fileserver_port;
     private boolean _am_i_leaving = false;
     private List<String> _leave_acks;
+
+    public List<String> _hop_log = Collections.synchronizedList(new ArrayList<String>());
+    public List<String> _time_log = Collections.synchronizedList(new ArrayList<String>());
 
     /*
     _search_agents stores UUID(strings) : SearchAgent object
@@ -31,6 +38,49 @@ public class Node extends Thread {
 
     public void set_id(int id) {
         _node_id = id;
+    }
+
+    private void reset_logs() {
+        try {
+            Writer log_writer = new PrintWriter(new FileWriter("query_hop.log"));
+            log_writer.append("");
+            log_writer.close();
+        } catch(IOException ex) {
+            ex.printStackTrace();
+        }
+        try {
+            Writer log_writer = new PrintWriter(new FileWriter("time_log.log"));
+            log_writer.append("");
+            log_writer.close();
+        } catch(IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void write_hoplog() {
+        try {
+            Writer log_writer = new PrintWriter(new FileWriter("query_hop.log",true));
+            for(String line : _hop_log) {
+                log_writer.append(line);
+            }
+            log_writer.close();
+        } catch(IOException ex) {
+            ex.printStackTrace();
+        }
+        _hop_log.clear();
+    }
+
+    private void write_timelog() {
+        try {
+            Writer log_writer = new PrintWriter(new FileWriter("time.log",true));
+            for(String line : _time_log) {
+                log_writer.append(line);
+            }
+            log_writer.close();
+        } catch(IOException ex) {
+            ex.printStackTrace();
+        }
+        _time_log.clear();
     }
 
     public synchronized void take_commands() {
@@ -358,6 +408,8 @@ public class Node extends Thread {
             _connector.send_message(neighbours_data, new NodeInfo(chosen_node));
 
             say_bye();
+            write_hoplog();
+            write_timelog();
 
         }
 
@@ -395,13 +447,15 @@ public class Node extends Thread {
 
     @Override
     public void run() {
+        reset_logs();
         FileServer fs = new FileServer(this);
         fs.start();
         take_commands();
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
             public void run() {
-                say_bye();
+
             }
         });
     }

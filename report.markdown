@@ -14,6 +14,9 @@ nodes via `Connector`. This class implements setting up
 of TCP channels to neighbours, and maintaining
 Lists of Sockets and output streams to connected neighbours.
 
+As soon as a node is alive at a specific ip:port, it will 
+listen for incoming TCP connections continuosly. 
+
 In order to connect to another node of a cluster, we have to
 know the IP:PORT pair for the another node. `node` can call
 `join_neighbour` method of `_connector`, to join a neighbour.
@@ -129,7 +132,7 @@ public synchronized boolean ready_to_leave() {
 This protocol avoids deadlocks by breaking ties based on `node_id`. This also makes sure
 that concurrent leave works fine. 
 
-Say `n0` is connected to `n2` and `n3` and `n1`. `n1` is conneted to `n4` and `n5` also.
+Say `n0` is connected to `n2` and `n3` and `n1`. `n1` is connected to `n4` and `n5` also.
 If `n0` and `n1` start Leave protocol concurrently, both have set their
 `_am_i_leaving` to true. 
 
@@ -249,7 +252,81 @@ A `Search` message contains
 * UUID of the search (which the initiator sets)
 
 #### Local FileSearch
+`Local FileSearch` attempts to search its local directory 
+using the keyword in search query. The keyword is checked 
+against the filename as well as its corresponding keywords 
+in the metadata file.
+
+```
+ if(localFileSearch returns results)
+   send search_results back to requesting node
+ else 
+   do nothing
+```
+
+#### FileSearch on network nodes
+If Local File Search fails, the search request is passed on 
+to the neighbors of current node, except for the node where 
+the sending node received the request from. Each time a 
+request is forwarded to neighboring nodes, the hop count 
+is monotonically reduced. If hopcount<=1, the search 
+request is not forwarded ahead. 
+
+Say `n0` is connected to `n1`, `n1` connected to `n2` and 
+`n3`. `n3` is connected to `n4` and `n5` also. If the search 
+request begins from `n0`, and its local search fails, it 
+forwards the request to `n1`. If the request fails at `n1` 
+too, the request is send to `n2` and `n3` but not to `n0`. 
+If the request was forwarded from `n3`, it would be sent 
+to `n4` and `n5`, but not to `n1`.
+
 
 ### Search_Result
+This message is sent when a search query returns a successful 
+result. This message is sent after a successful local FileSearch. 
+A node receiving this message, could possibly be the initiator 
+of the search request or an intermediary node.
+```
+ if(SearchAgent contains UUID returned by search_result)
+   search_result has reached initiator
+   display results
+   terminate the search agent
+ else
+   search_result has reached intermediate node
+   lookup for peer of current node and forward the search_result to it
+```
 
+### Fetch
+`fetch` is used to download a file from the desired node. The 
+filename and ip:port address of the node is passed when the 
+fetch request is made. 
+
+The following components work while fetching the file. 
+#### Downloader
+`Downloader` extends Thread and handles fetch requests initiated by 
+the current node. Downloader thread starts each time a request is made.
+`filename`, `server ip` and `server port` is passed as parameters to 
+Downloader. As the original server port is already in use, we offset the
+original server port with a pre-decided value to handle the incoming fetch
+requests. 
+
+`Downloader` creates a socket connection with the `server ip` and `server port` 
+passed to it as parameters. Metadata content and file contents are read 
+using `InputStreamReader`. The read data is converted to bytes and written
+to the corresponding files. A file is assumed to be capable of a large
+size(>1 MB). In order to write the file efficiently, the file is 
+written in chunks of specific size. File writing is done as following:
+```java
+ public void copyStream(InputStream input, OutputStream output)
+         throws IOException {
+     byte[] buffer = new byte[1024]; // Adjust if you want
+     int bytesRead;
+     while ((bytesRead = input.read(buffer)) != -1) {
+         output.write(buffer, 0, bytesRead);
+     }
+ }
+```
+
+#### FileServer
+After a node is alive, `FileServer` runs at each node. It also extends Thread.
 

@@ -2,7 +2,33 @@
 % Swair Shah, Miren Tanna
 % 22-July-2014
 
-# System Overview
+# System Design
+
+## Node
+The core behavior of a class is implemented in Node class.
+Node is to be started by passing ip:port in command line,
+followed by a node_id.
+
+Node has the ability to establish TCP channels to other 
+nodes via `Connector`. This class implements setting up
+of TCP channels to neighbours, and maintaining 
+Lists of Sockets and output streams to connected neighbours.
+
+In order to connect to another node of a cluster, we have to
+know the IP:PORT pair for the another node. `node` can call
+`join_neighbour` method of `_connector`, to join a neighbour.
+This method sends a `join` message to another node.
+Joining a neighbour adds an entry to `_node_lookup` and
+corresponding socket and outputstreams to other Lists in 
+`_connector`. Any future messages to a neighbour are sent
+via this established TCP connection. 
+
+As soon as a node gets a `join` message 
+it inturn joins the sender of the message. When 
+`_connector` instance variable of a `node` accepts
+a connection from another node, it spawns an instance of `ListenerThread`,
+and from that point on all incoming `messages` with 
+the other node comes to this ListenerThread.
 
 ## Message Types
 A node can send/receive the following types of messages:
@@ -15,8 +41,7 @@ A node can send/receive the following types of messages:
 6. bye_ack
 7. can_i_leave
 8. yes_you_can
-9. 
-
+9. no_you_cannot
 
 ### Join
 A `Join` message contains message type `join`, sender and receiver
@@ -143,6 +168,35 @@ The implementation of search procedure in Node class has
 two important parts, one is the `SearchAgent` and other is 
 `SearchKeeper`.
 
+#### SearchAgent
+
+`SearchAgent` extends Thread and handles queries initiated
+by the current node. For every query initiated by node,
+there is a `SearchAgent` thread spawned. Each initiated
+search has a UUID. Node stores UUID and reference to
+corresponding `SearchAgent`. 
+`SearchAgent` takes care of the timeout and increasing 
+hop_count after specific timeouts.
+
+First search attempt is sent with hop_count 1. Timeout happens at
+t_out\*1. Next query is sent with double the hop_count,
+and the timeout is also doubled. This goes on till
+hop_count exceeds 16. So last query attempt is made with
+a `search` message of hop_count 16. 
+
+During all this if a search_result is received corresponding
+to a query initited by current node, the SearchAgent 
+corresponding to that UUID is terminated. So it won't send any
+more queries with increased hop_count. The node can still
+receive the results for that query.
+
+SearchAgent makes sure to terminate itself when hop_count
+reaches 16.
+
+#### SearchKeeper
+`SearchKeeper` extends Thread and handles queries which are
+not initiated by current node. 
+
 A `Search` message contains 
 * message type `search`, 
 * `NodeInfo` of sender, receiver, initiator
@@ -151,7 +205,6 @@ A `Search` message contains
 
 #### Local FileSearch
 
->>>>>>> 2d241e8d6ba25a9775cdd4452915a6b7688336f8
 ### Search_Result
 
 

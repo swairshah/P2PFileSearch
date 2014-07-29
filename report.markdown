@@ -1,6 +1,6 @@
 % Peer to Peer File search 
 % Swair Shah, Miren Tanna
-% 22-July-2014
+% 29-July-2014
 
 # System Design
 
@@ -9,9 +9,9 @@ The core behavior of a class is implemented in Node class.
 Node is to be started by passing ip:port in command line,
 followed by a node_id.
 
-Node has the ability to establish TCP channels to other 
+Node has the ability to establish TCP channels to other
 nodes via `Connector`. This class implements setting up
-of TCP channels to neighbours, and maintaining 
+of TCP channels to neighbours, and maintaining
 Lists of Sockets and output streams to connected neighbours.
 
 In order to connect to another node of a cluster, we have to
@@ -34,7 +34,7 @@ the other node comes to this ListenerThread.
 A node can send/receive the following types of messages:
 
 1. join 
-2. fetch 
+2. fetch
 3. search
 4. search_result
 5. bye
@@ -195,7 +195,52 @@ reaches 16.
 
 #### SearchKeeper
 `SearchKeeper` extends Thread and handles queries which are
-not initiated by current node. 
+not initiated by current node. There is one SearchKeeper per
+node. It handles all relayed searches. SearchKeeper maintains
+search IDs (UUID) and the peer which sent this search result
+to it (so that the node can send the same neighbour the result
+of that search). It also maintains a TTL counter for each
+query, and all queries are expired by the SearchKeeper in
+18 seconds (this can be changed of course, but since our
+node expects queries to be sent only till hop_count 16,
+18 seconds seem to be the reasonable time to expire
+a relayed search).
+
+SearchKeeper has following instance variables to
+store this information:
+```java
+/*
+_search_ids contains k:v pairs like:
+id : TTL
+when TTL hits 0 remove it.
+
+_search_peers contains k:v pairs like:
+id : NodeInfo of immediate sender of the request
+ */
+public ConcurrentHashMap<String,Integer> _search_ids;
+public ConcurrentHashMap<String,NodeInfo> _search_peers;
+```
+
+SearchKeeper thread runs the following while loop:
+
+```java
+while(true) {
+    try {
+        Thread.sleep(1000);
+    } catch (InterruptedException ex) {
+        ex.printStackTrace();
+    }
+    for(String id : _search_ids.keySet()) {
+        if (_search_ids.get(id) == 0) {
+            this.remove(id);
+        }
+        else {
+            int new_ttl = _search_ids.get(id) - 1000;
+            _search_ids.put(id,new_ttl);
+        }
+    }
+}
+```
 
 A `Search` message contains 
 * message type `search`, 

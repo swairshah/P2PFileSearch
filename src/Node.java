@@ -33,7 +33,7 @@ public class Node extends Thread {
         _search_keeper = new SearchKeeper(this);
         _search_keeper.start();
         _leave_acks = new ArrayList<>();
-
+        _start_times = new ConcurrentHashMap<>();
         _fileserver_port = info.port + 3000;
     }
 
@@ -431,9 +431,12 @@ public class Node extends Thread {
 
         }
 
-        else if (cmd.contains("fetch")){
-
+        else if (cmd.startsWith("fetch")){
             String fetch_request[]=cmd.split(" ");
+            if (fetch_request.length != 3) {
+                System.out.println("wrong usage of fetch!");
+                return;
+            }
             String ip_port[] = fetch_request[2].split(":");
 
             int port = Integer.parseInt(ip_port[1]) + 3000;

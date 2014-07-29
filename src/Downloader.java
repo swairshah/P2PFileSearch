@@ -6,6 +6,7 @@ public class Downloader extends Thread {
     private String _filename;
     private int _server_port;
     private String _server_ip;
+    private String _metafile = "metafile";
 
     public Downloader(String filename, String ip, int port) {
         _filename = filename;
@@ -35,7 +36,12 @@ public class Downloader extends Thread {
 
             InputStreamReader sin = new InputStreamReader(socket.getInputStream());
             BufferedReader read = new BufferedReader(sin);
-            String metadata = read.readLine().trim();
+            String metadata = _filename + " " + read.readLine().trim() + System.lineSeparator();
+
+            FileOutputStream metaout = new FileOutputStream(_metafile,true);
+            byte metadata_content[] = metadata.getBytes();
+            metaout.write(metadata_content);
+            metaout.close();
 
             InputStream is = socket.getInputStream();
             FileOutputStream fos = new FileOutputStream(_filename);

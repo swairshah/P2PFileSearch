@@ -315,7 +315,7 @@ requests.
 `Downloader` creates a socket connection with the `server ip` and `server port` 
 passed to it as parameters. Metadata content and file contents are read 
 using `InputStreamReader`. The read data is converted to bytes and written
-to the corresponding files. A file is assumed to be capable of a large
+to the corresponding files. A file is assumed to be of a large
 size(>1 MB). In order to write the file efficiently, the file is 
 written in chunks of specific size. File writing is done as following:
 
@@ -339,3 +339,51 @@ When a node receives a `fetch` command, it spawns a `Downloader` thread.
 Downloader connects to fileserver and asks for a file, gets the metadata
 for the file and then receives the byte stream for that file.
 
+It opens a port for TCP communication at the port passed to it as a 
+parameter. This is the same port with which the `Downloader` establishes connection.
+It accepts connection from the client node, and passes it on to `FileTransfer`.
+
+Data transfer is done only when the requested file exists at the current node. 
+The file is sent using an `OutputStream` in chunks of pre-decided size. 
+
+#How to Compile and Run
+To simulate a network of M nodes, ensure all the JAVA files are available on
+each nodes' local directory. We assume that some sample files are already available
+at these nodes. A metafile with information of each of these files with their
+corresponding keywords should also be present. No node is aware which files are 
+present at other nodes. The format of metafile should be:
+```
+filename1 keyword1,keyword2,...,keywordN
+filename2 keyword1,keyword2,...,keywordN
+.
+.
+filenameN keyword1,keyword2,...,keywordN
+```
+At each node compile all the files in the directory using the command:
+```
+javac *.java
+```
+To run the program, you should know the IP address of the current node:
+```
+java Node IPAddress:Port
+```
+To find out what options are supported by the program, enter:
+```
+help
+```
+To join other nodes in the network:
+```
+join IPAddress:Port
+```
+To search for a file, enter:
+```
+search search_term
+```
+To fetch the file based on the list of results received, enter:
+```
+fetch file_name IPAddress:Port
+```
+To leave the network, enter:
+```
+leave
+```

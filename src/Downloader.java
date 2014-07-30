@@ -36,7 +36,7 @@ public class Downloader extends Thread {
 
             InputStreamReader sin = new InputStreamReader(socket.getInputStream());
             BufferedReader read = new BufferedReader(sin);
-            String metadata = _filename + " " + read.readLine().trim() + System.lineSeparator();
+            String metadata = System.lineSeparator() + _filename + " " + read.readLine().trim() + System.lineSeparator();
 
             FileOutputStream metaout = new FileOutputStream(_metafile,true);
             byte metadata_content[] = metadata.getBytes();

@@ -281,11 +281,12 @@ If the request was forwarded from `n3`, it would be sent
 to `n4` and `n5`, but not to `n1`.
 
 
-### Search_Result
+#### Search_Result
 This message is sent when a search query returns a successful 
 result. This message is sent after a successful local FileSearch. 
 A node receiving this message, could possibly be the initiator 
 of the search request or an intermediary node.
+
 ```
  if(SearchAgent contains UUID returned by search_result)
    search_result has reached initiator
@@ -302,6 +303,7 @@ filename and ip:port address of the node is passed when the
 fetch request is made. 
 
 The following components work while fetching the file. 
+
 #### Downloader
 `Downloader` extends Thread and handles fetch requests initiated by 
 the current node. Downloader thread starts each time a request is made.
@@ -316,10 +318,11 @@ using `InputStreamReader`. The read data is converted to bytes and written
 to the corresponding files. A file is assumed to be capable of a large
 size(>1 MB). In order to write the file efficiently, the file is 
 written in chunks of specific size. File writing is done as following:
+
 ```java
  public void copyStream(InputStream input, OutputStream output)
          throws IOException {
-     byte[] buffer = new byte[1024]; // Adjust if you want
+     byte[] buffer = new byte[1024];
      int bytesRead;
      while ((bytesRead = input.read(buffer)) != -1) {
          output.write(buffer, 0, bytesRead);
@@ -327,6 +330,12 @@ written in chunks of specific size. File writing is done as following:
  }
 ```
 
-#### FileServer
+#### FileServer, FileTransfer and Downloader
 After a node is alive, `FileServer` runs at each node. It also extends Thread.
+FileServer is responsible for spawning `FileTransfer` threads.
+
+When a node receives a `fetch` command, it spawns a `Downloader` thread.
+(We assume that the fileserver port for a server is its listener port+3000).
+Downloader connects to fileserver and asks for a file, gets the metadata
+for the file and then receives the byte stream for that file.
 

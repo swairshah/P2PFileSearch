@@ -1,7 +1,3 @@
-% Peer to Peer File search 
-% Swair Shah, Miren Tanna
-% 29-July-2014
-
 # System Design
 
 ## Node
